@@ -1,0 +1,29 @@
+
+{
+  "schemaVersion": 1,
+  "id": "visiblechat",
+  "version": "1.0",
+  "name": "VisibleChat",
+  "description": "",
+  "authors": [
+    "3AK0"
+  ],
+  "mixins": [
+    "ChatHeads.mixins.json"
+  ],
+  "contact": {
+    "repo": "https://github.com/mslot/ZakoHealthIndicator"
+  },
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "hw.zako.visiblechat.VisibleChat"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.4",
+    "fabric": "*",
+    "cloth-config": ">=8.2.88"
+  }
+}
