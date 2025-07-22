@@ -64,7 +64,7 @@ public class ChatManager {
         matrices.scale(-0.025F, -0.025F, 0.025F);
         float i = 0.0F;
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        Matrix4f matrix4f = matrices.peek().getModel();
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
         for (String msg : messages) {
             textRenderer.draw(msg, -textRenderer.getWidth(msg) / 2.0F, i, 0xFFFFFF, false, matrix4f, vertexConsumerProvider, false, j, light);
             i += 10.0F;
