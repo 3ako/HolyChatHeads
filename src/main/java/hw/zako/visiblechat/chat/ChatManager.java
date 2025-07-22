@@ -7,30 +7,34 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import org.joml.Matrix4f;
+import net.minecraft.util.math.Matrix4f;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatManager {
     private static final Pattern pattern = Pattern.compile("^([ɢʟ])\\s\\|\\s(?:«[^»]+»\\s)?(\\S+).*?:\\s(.+)$");
 
     public static void handleChatMessage(String rawMessage) {
+        if (!VisibleChat.getSettings().isEnabled()) {
+            return;
+        }
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.getNetworkHandler() == null) return;
-
-        var matcher = pattern.matcher(rawMessage);
+        if (client.getNetworkHandler() == null)
+            return;
+        Matcher matcher = pattern.matcher(rawMessage);
         if (matcher.find()) {
             String name = matcher.group(2);
-
-            if (name == null || name.length() > 32 || name.length() < 4) return;
+            if (name == null || name.length() > 32 || name.length() < 4)
+                return;
             String cookedMessage = matcher.group(3);
-
             int maxLineSize = VisibleChat.getSettings().getMaxLineSize();
             if (rawMessage.length() > maxLineSize) {
                 VisibleChat.getMessageCache().put(name, StringUtils.chunkedMessage(cookedMessage, maxLineSize));
             } else {
-                VisibleChat.getMessageCache().put(name, List.of(cookedMessage));
+                VisibleChat.getMessageCache().put(name, Collections.singletonList(cookedMessage));
             }
         }
     }
@@ -60,9 +64,9 @@ public class ChatManager {
         matrices.scale(-0.025F, -0.025F, 0.025F);
         float i = 0.0F;
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        Matrix4f matrix4f = matrices.peek().getModel();
         for (String msg : messages) {
-            textRenderer.draw(msg, -textRenderer.getWidth(msg) / 2.0F, i, 0xFFFFFF, false, matrix4f, vertexConsumerProvider, TextRenderer.TextLayerType.NORMAL, j, light);
+            textRenderer.draw(msg, -textRenderer.getWidth(msg) / 2.0F, i, 0xFFFFFF, false, matrix4f, vertexConsumerProvider, false, j, light);
             i += 10.0F;
         }
         matrices.pop();
