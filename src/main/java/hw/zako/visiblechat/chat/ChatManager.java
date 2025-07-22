@@ -4,12 +4,10 @@ import hw.zako.visiblechat.VisibleChat;
 import hw.zako.visiblechat.util.StringUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.player.PlayerEntity;
+import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -41,52 +39,32 @@ public class ChatManager {
         return VisibleChat.getMessageCache().getIfPresent(name);
     }
 
-    public static void render(
-    EntityRenderDispatcher renderDispatcher,
-    PlayerEntityRenderState entity,
-    MatrixStack matrices,
-    VertexConsumerProvider vertexConsumerProvider,
-    int light
-    ) {
-        if (entity == null || matrices == null) return;
-
-        if (entity.displayName == null) return;
-
-        String name = entity.name;
+    public static void render(PlayerEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, int light) {
+        if (entity == null || matrices == null)
+            return;
+        if (entity.getDisplayName() == null)
+            return;
+        String name = entity.getEntityName();
         List<String> messages = getMessages(name);
-        if (messages == null || messages.isEmpty()) return;
-
-        int j = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
-
-        Vec3d vec3d = entity.nameLabelPos;
-        double height = (messages.size() * (0.3f)) + vec3d.y + 0.7f;
-
+        if (messages == null || messages.isEmpty())
+            return;
+        int j = (int)((MinecraftClient.getInstance()).options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24;
+        double height = (messages.size() * 0.3F) + (entity.getHeight() + (VisibleChat.getSettings().getRenderOffset() / 100f)) + 0.499999988079071D;
+        double distance = MinecraftClient.getInstance().getEntityRenderDispatcher().getSquaredDistanceToCamera(entity);
         matrices.push();
-        matrices.translate(vec3d.x, height, vec3d.z);
-        Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-
-        matrices.multiply(camera.getRotation());
-
-        matrices.scale(0.025F, -0.025F, 0.025F);
-
-        float i = 0f;
-        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        for (String msg : messages) {
-            textRenderer.draw(
-                msg,
-                -textRenderer.getWidth(msg) / 2f,
-                i,
-                    0xffffff,
-                false,
-                matrices.peek().getPositionMatrix(),
-                vertexConsumerProvider,
-                TextRenderer.TextLayerType.NORMAL,
-                j,
-                light
-            );
-            i += (float)(10);
+        matrices.translate(0.0f, height, 0.0f);
+        if (distance < 100.0 && entity.getScoreboard().getObjectiveForSlot(2) != null) {
+            matrices.translate(0.0D, 9.0F * 1.15F * 0.025F, 0.0D);
         }
-
+        matrices.multiply(MinecraftClient.getInstance().getEntityRenderDispatcher().getRotation());
+        matrices.scale(-0.025F, -0.025F, 0.025F);
+        float i = 0.0F;
+        TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+        Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+        for (String msg : messages) {
+            textRenderer.draw(msg, -textRenderer.getWidth(msg) / 2.0F, i, 0xFFFFFF, false, matrix4f, vertexConsumerProvider, TextRenderer.TextLayerType.NORMAL, j, light);
+            i += 10.0F;
+        }
         matrices.pop();
     }
 }

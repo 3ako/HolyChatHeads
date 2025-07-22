@@ -1,0 +1,10 @@
+{
+  "text.autoconfig.visiblechat.option.chatRenderDelay": "Text lifetime",
+  "text.autoconfig.visiblechat.option.enabled": "Enable mod",
+  "text.autoconfig.visiblechat.option.renderOffset": "Offset from Name",
+  "text.autoconfig.visiblechat.option.renderOffset.@Tooltip": "Specify how far above the name the text should be rendered",
+  "text.autoconfig.visiblechat.option.chatRenderDelay.@Tooltip": "Specify how many seconds the text will be displayed",
+  "text.autoconfig.visiblechat.option.maxLineSize": "Line length",
+  "text.autoconfig.visiblechat.option.maxLineSize.@Tooltip": "Specify how long a line should be before wrapping",
+  "text.autoconfig.visiblechat.title": "Zako Boost"
+}
