@@ -10,7 +10,7 @@
   "icon": "assets/visiblechat/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": [
+    "main": [
       "hw.zako.visiblechat.VisibleChat"
     ],
     "modmenu": [

@@ -7,18 +7,19 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.ActionResult;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class VisibleChat implements ClientModInitializer {
+public class VisibleChat implements ModInitializer {
     private static Cache<String, List<String>> messageCache;
 
     private static Settings settings;
 
     @Override
-    public void onInitializeClient() {
+    public void onInitialize() {
         AutoConfig.register(
                 Settings.class,
                 JanksonConfigSerializer::new
