@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "me.zyouime.visiblechat.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "holychatheads.refmap.json",
+  "verbose": false,
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "ClientPlayNetHandlerMixin",
+    "LabyModAddonsGuiMixin",
+    "LivingRendererMixin"
+  ]
+}

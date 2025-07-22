@@ -1,0 +1,8 @@
+{
+  "name": "HolyChatHeads",
+  "author": "_3AKO_",
+  "description": "Port from zyouime13",
+  "uuid": "%uuid%",
+  "mainClass": "me.zyouime.visiblechat.VisibleChat",
+  "transformerClass": "me.zyouime.visiblechat.VisibleChatTransformer"
+}

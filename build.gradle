@@ -1,94 +1,102 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven {
+            name = 'impactdevelopment-repo'
+            url = 'https://impactdevelopment.github.io/maven/'
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.github.ImpactDevelopment', name: 'ForgeGradle', version: '3.0.115'
+        classpath group: 'com.github.ImpactDevelopment', name: 'MixinGradle', version: '0.6.2'
+    }
+}
+
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
-    id 'maven-publish'
+    id 'de.undercouch.download' version '4.0.0'
+}
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+
+version = '1.0'
+group = 'me.zyouime' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'HolyChatHeads'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+def mcpVersion = [channel: 'snapshot', version: '20201028-1.16.3']
+
+mixin {
+    defaultObfuscationEnv searge
+    add sourceSets.main, "holychatheads.refmap.json"
 }
 
-version = project.mod_version
-group = project.maven_group
-
-base {
-    archivesName = project.archives_base_name
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
 }
 
+minecraft {
+    mappings mcpVersion
+
+    if (getProject().hasProperty("forge")) {
+        reobfMappings 'searge'
+    } else {
+        reobfMappings 'notch'
+    }
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            main "launch.AddonLauncher"
+
+            environment 'assetIndex', '{asset_index}'
+            environment 'assetDirectory', downloadAssets.output
+            environment 'nativesDirectory', extractNatives.output
+
+            environment 'tweakClass', 'net.labymod.vanilla.LabyModTweaker'
+
+            jvmArg('-DdebugMode=true')
+            jvmArg('-Daddonresources=addon.json')
+        }
+    }
+}
 
 repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
-    maven { url "https://maven.shedaniel.me/" }
-    maven { url "https://maven.terraformersmc.com/releases/" }
+    mavenCentral()
+    maven {
+        name = "spongepowered"
+        url = "https://repo.spongepowered.org/maven"
+    }
+    maven {
+        name = 'impactdevelopment-repo'
+        url = 'https://impactdevelopment.github.io/maven/'
+    }
+    mavenLocal()
 }
+
 
 dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modApi include("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-    modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-}
+    annotationProcessor("org.spongepowered:mixin:0.8.2:processor")
 
-processResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
-    filteringCharset "UTF-8"
+    minecraft 'com.github.ImpactDevelopment:Vanilla:1.16.5'
+    compile(files('libs/api.jar'))
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
-    }
-}
-
-def targetJavaVersion = 21
-tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release.set(targetJavaVersion)
-    }
-}
-
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
+    compile("org.ow2.asm:asm-analysis:6.2") { transitive = false }
+    compile("org.ow2.asm:asm-util:6.2") { transitive = false }
+    compile("org.ow2.asm:asm-commons:6.2") { transitive = false }
+    compile("org.spongepowered:mixin:0.8.2") { transitive = false }
+    compile("net.minecraft:launchwrapper:1.12") { transitive = false }
 }
 
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archives_base_name}" }
-    }
+    // Excludes the start file
+    exclude("**/launch")
 }
 
-// configure the maven publication
-publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
-}
