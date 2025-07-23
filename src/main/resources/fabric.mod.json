@@ -1,36 +1,29 @@
+
 {
   "schemaVersion": 1,
   "id": "visiblechat",
-  "version": "${version}",
-  "name": "HolyChatHeads",
-  "description": "Портировал zyouime13",
-  "authors": ["_3AKO_"],
-  "contact": {},
-  "license": "MIT",
-  "icon": "assets/visiblechat/icon.png",
-  "environment": "client",
-  "entrypoints": {
-    "main": [
-      "hw.zako.visiblechat.VisibleChat"
-    ],
-    "modmenu": [
-      "hw.zako.visiblechat.modmenu.ModMenuImpl"
-    ]
-  },
+  "version": "1.0",
+  "name": "VisibleChat",
+  "description": "",
+  "authors": [
+    "3AK0"
+  ],
   "mixins": [
     "ChatHeads.mixins.json"
   ],
-  "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+  "contact": {
+    "repo": "https://github.com/mslot/ZakoHealthIndicator"
   },
-  "custom": {
-    "modmenu": {
-      "links": {
-        "Telegram _3AKO_": "https://t.me/StarikZako",
-        "Telegram zyouime13": "https://t.me/zyouime13"
-      }
-    }
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "hw.zako.visiblechat.VisibleChat"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.4",
+    "fabric": "*",
+    "cloth-config": ">=8.2.88"
   }
 }

@@ -1,36 +1,36 @@
 package hw.zako.visiblechat.mixins;
 
-import hw.zako.visiblechat.VisibleChat;
 import hw.zako.visiblechat.chat.ChatManager;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements FeatureRendererContext<T, M> {
+@Mixin(PlayerEntityRenderer.class)
+public abstract class LivingEntityRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityRenderState, PlayerEntityModel> {
 
-
-    protected LivingEntityRendererMixin(EntityRendererFactory.Context ctx) {
-        super(ctx);
+    public LivingEntityRendererMixin(EntityRendererFactory.Context ctx, PlayerEntityModel model, float shadowRadius) {
+        super(ctx, model, shadowRadius);
     }
 
-    @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("RETURN"))
-    private void render(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        if (this.dispatcher.getSquaredDistanceToCamera(livingEntity) > 4096) {
-            return;
+    @Inject(at = @At("RETURN"),
+            method = "renderLabelIfPresent(Lnet/minecraft/client/render/entity/state/EntityRenderState;Lnet/minecraft/text/Text;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V")
+    public void render(EntityRenderState state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+        if (state.squaredDistanceToCamera > 4096) return;
+
+        if (state instanceof PlayerEntityRenderState renderer) {
+            ChatManager.render(dispatcher, renderer, matrices, vertexConsumers, light );
         }
-        if (livingEntity instanceof PlayerEntity && VisibleChat.getSettings().isEnabled() && !livingEntity.isInvisible()) {
-            ChatManager.render((PlayerEntity) livingEntity, matrixStack, vertexConsumerProvider, i);
-        }
+
     }
 }
