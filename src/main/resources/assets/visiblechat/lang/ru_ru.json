@@ -1,0 +1,10 @@
+{
+  "text.autoconfig.visiblechat.option.chatRenderDelay": "Время жизни текста",
+  "text.autoconfig.visiblechat.option.renderOffset": "Смещение от ника",
+  "text.autoconfig.visiblechat.option.enabled": "Включить мод",
+  "text.autoconfig.visiblechat.option.renderOffset.@Tooltip": "Укажите, насколько выше от ника будет рендериться текст",
+  "text.autoconfig.visiblechat.option.chatRenderDelay.@Tooltip": "Укажите, сколько в секундах будет рендериться текст",
+  "text.autoconfig.visiblechat.option.maxLineSize.@Tooltip": "Укажите, какая должна быть длина 1 строки до перехода на следующую",
+  "text.autoconfig.visiblechat.option.maxLineSize": "Длина строки",
+  "text.autoconfig.visiblechat.title": "Зако буст"
+}

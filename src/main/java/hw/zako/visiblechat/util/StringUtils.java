@@ -29,7 +29,7 @@ public class StringUtils {
             builder.append(word);
         }
 
-        if (builder.length() > 0) {
+        if (!builder.isEmpty()) {
             lines.add(builder.toString());
         }
 
