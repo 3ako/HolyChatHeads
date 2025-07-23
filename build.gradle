@@ -1,67 +1,102 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven {
+            name = 'impactdevelopment-repo'
+            url = 'https://impactdevelopment.github.io/maven/'
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.github.ImpactDevelopment', name: 'ForgeGradle', version: '3.0.115'
+        classpath group: 'com.github.ImpactDevelopment', name: 'MixinGradle', version: '0.6.2'
+    }
+}
+
 plugins {
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'fabric-loom' version '1.9-SNAPSHOT'
-    id 'maven-publish'
+    id 'de.undercouch.download' version '4.0.0'
+}
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
+
+version = '1.0'
+group = 'me.zyouime' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'HolyChatHeads'
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+def mcpVersion = [channel: 'snapshot', version: '20201028-1.16.3']
+
+mixin {
+    defaultObfuscationEnv searge
+    add sourceSets.main, "holychatheads.refmap.json"
 }
 
-version = project.mod_version
-group = project.maven_group
-
-repositories {
-    maven { url "https://maven.shedaniel.me/" }
-    maven { url "https://maven.terraformersmc.com/releases/" }
-    mavenCentral()
-
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    modApi("me.shedaniel.cloth:cloth-config-fabric:10.0.96") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
-}
-
-processResources {
-    inputs.property "version", project.version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
+    options.encoding = "UTF-8"
 }
 
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    archivesBaseName = project.archives_base_name
-    withSourcesJar()
-}
+minecraft {
+    mappings mcpVersion
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+    if (getProject().hasProperty("forge")) {
+        reobfMappings 'searge'
+    } else {
+        reobfMappings 'notch'
     }
-}
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            main "launch.AddonLauncher"
+
+            environment 'assetIndex', '{asset_index}'
+            environment 'assetDirectory', downloadAssets.output
+            environment 'nativesDirectory', extractNatives.output
+
+            environment 'tweakClass', 'net.labymod.vanilla.LabyModTweaker'
+
+            jvmArg('-DdebugMode=true')
+            jvmArg('-Daddonresources=addon.json')
         }
     }
 }
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spongepowered"
+        url = "https://repo.spongepowered.org/maven"
+    }
+    maven {
+        name = 'impactdevelopment-repo'
+        url = 'https://impactdevelopment.github.io/maven/'
+    }
+    mavenLocal()
+}
+
+
+dependencies {
+    annotationProcessor("org.spongepowered:mixin:0.8.2:processor")
+
+    minecraft 'com.github.ImpactDevelopment:Vanilla:1.16.5'
+    compile(files('libs/api.jar'))
+
+    compile("org.ow2.asm:asm-analysis:6.2") { transitive = false }
+    compile("org.ow2.asm:asm-util:6.2") { transitive = false }
+    compile("org.ow2.asm:asm-commons:6.2") { transitive = false }
+    compile("org.spongepowered:mixin:0.8.2") { transitive = false }
+    compile("net.minecraft:launchwrapper:1.12") { transitive = false }
+}
+
+jar {
+    // Excludes the start file
+    exclude("**/launch")
+}
+
